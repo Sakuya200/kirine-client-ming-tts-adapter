@@ -1,0 +1,293 @@
+[
+  {
+    "task": "text-to-speech",
+    "base-model": "ming_tts",
+    "params": [
+      {
+        "name": "instruction",
+        "type": "string",
+        "componentType": "textarea",
+        "componentProps": {
+          "label": "自然语言指令（FREEFORM）",
+          "rows": 3,
+          "placeholder": "例：用温暖、亲密的讲故事声音，语速轻缓，带一丝怀旧感。"
+        },
+        "required": false,
+        "defaultValue": "",
+        "description": "未选择说话人时必填：用一句自然语言描述音色与语气（FREEFORM 模式）。已选内置音色说话人时忽略此字段。"
+      },
+      {
+        "name": "cfg",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "CFG 引导强度", "min": 0, "max": 10, "step": 0.1 },
+        "required": true,
+        "defaultValue": 2.0,
+        "description": "classifier-free guidance 强度，上游默认 2.0。"
+      },
+      {
+        "name": "temperature",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "采样温度", "min": 0, "max": 2, "step": 0.05 },
+        "required": true,
+        "defaultValue": 0.0,
+        "description": "采样温度，0 为贪心解码（上游默认）。"
+      },
+      {
+        "name": "seed",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "随机种子", "step": 1, "nullable": true, "inputMode": "numeric" },
+        "required": false,
+        "defaultValue": null,
+        "description": "留空使用上游默认种子（1895）。"
+      },
+      {
+        "name": "textNormalization",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "文本正则化", "text": "数字/日期/单位归一化" },
+        "required": false,
+        "defaultValue": false,
+        "description": "依赖 pynini（Windows 无可靠 wheel）。默认关闭，关闭时跳过正则化。需启用请先 conda install -c conda-forge pynini==2.1.6。"
+      },
+      {
+        "name": "trimSilence",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "裁剪尾部静音", "text": "裁剪", "textOn": "裁剪", "textOff": "保留" },
+        "required": false,
+        "defaultValue": true,
+        "description": "默认裁剪模型输出的尾部静音。"
+      }
+    ]
+  },
+  {
+    "task": "voice-clone",
+    "base-model": "ming_tts",
+    "params": [
+      {
+        "name": "synthesisMode",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "合成模式",
+          "options": [
+            { "label": "克隆复刻（TTS）", "value": "clone" },
+            { "label": "情绪控制（EMOTION）", "value": "emotion" },
+            { "label": "语速/音调/音量（BASIC）", "value": "attributes" },
+            { "label": "方言（DIALECT）", "value": "dialect" },
+            { "label": "多语言（MULTILINGUAL）", "value": "multilingual" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "clone",
+        "description": "决定上游任务类型。克隆复刻与多语言需要参考音频的转录文本；语速音调音量与方言不接受转录文本。"
+      },
+      {
+        "name": "emotion",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "情绪",
+          "visibleWhen": { "field": "synthesisMode", "equals": "emotion" },
+          "options": [
+            { "label": "高兴", "value": "高兴" },
+            { "label": "悲伤", "value": "悲伤" },
+            { "label": "愤怒", "value": "愤怒" },
+            { "label": "恐惧", "value": "恐惧" },
+            { "label": "厌恶", "value": "厌恶" },
+            { "label": "惊讶", "value": "惊讶" },
+            { "label": "中性", "value": "中性" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "中性",
+        "description": "目标情绪（需参考音频，参考文本可选）。"
+      },
+      {
+        "name": "speed",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "语速",
+          "visibleWhen": { "field": "synthesisMode", "equals": "attributes" },
+          "options": [
+            { "label": "慢速", "value": "慢速" },
+            { "label": "中速", "value": "中速" },
+            { "label": "快速", "value": "快速" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "中速",
+        "description": "语速控制（需参考音频，不接受参考文本）。"
+      },
+      {
+        "name": "pitch",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "音调",
+          "visibleWhen": { "field": "synthesisMode", "equals": "attributes" },
+          "options": [
+            { "label": "低", "value": "低" },
+            { "label": "中", "value": "中" },
+            { "label": "高", "value": "高" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "中",
+        "description": "音调控制。"
+      },
+      {
+        "name": "volume",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "音量",
+          "visibleWhen": { "field": "synthesisMode", "equals": "attributes" },
+          "options": [
+            { "label": "低", "value": "低" },
+            { "label": "中", "value": "中" },
+            { "label": "高", "value": "高" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "中",
+        "description": "音量控制。"
+      },
+      {
+        "name": "dialect",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "方言",
+          "visibleWhen": { "field": "synthesisMode", "equals": "dialect" },
+          "options": [
+            { "label": "川渝话", "value": "川渝话" },
+            { "label": "广粤话", "value": "广粤话" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "川渝话",
+        "description": "目标方言（需参考音频，不接受参考文本）。"
+      },
+      {
+        "name": "languageId",
+        "type": "string",
+        "componentType": "select",
+        "componentProps": {
+          "label": "目标语言",
+          "visibleWhen": { "field": "synthesisMode", "equals": "multilingual" },
+          "options": [
+            { "label": "德语 (German)", "value": "German" },
+            { "label": "西班牙语 (Spanish)", "value": "Spanish" },
+            { "label": "法语 (French)", "value": "French" },
+            { "label": "韩语 (Korean)", "value": "Korean" },
+            { "label": "日语 (Japanese)", "value": "Japanese" }
+          ]
+        },
+        "required": true,
+        "defaultValue": "Japanese",
+        "description": "多语言合成的目标语言（需参考音频与对应的参考文本）。德/西/法不在应用语言枚举内，仅经此字段生效。"
+      },
+      {
+        "name": "cfg",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "CFG 引导强度", "min": 0, "max": 10, "step": 0.1 },
+        "required": true,
+        "defaultValue": 2.0,
+        "description": "classifier-free guidance 强度，上游默认 2.0。"
+      },
+      {
+        "name": "temperature",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "采样温度", "min": 0, "max": 2, "step": 0.05 },
+        "required": true,
+        "defaultValue": 0.0,
+        "description": "采样温度，0 为贪心解码（上游默认）。"
+      },
+      {
+        "name": "seed",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "随机种子", "step": 1, "nullable": true, "inputMode": "numeric" },
+        "required": false,
+        "defaultValue": null,
+        "description": "留空使用上游默认种子（1895）。"
+      },
+      {
+        "name": "textNormalization",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "文本正则化", "text": "数字/日期/单位归一化" },
+        "required": false,
+        "defaultValue": false,
+        "description": "依赖 pynini（Windows 无可靠 wheel）。默认关闭，关闭时跳过正则化。需启用请先 conda install -c conda-forge pynini==2.1.6。"
+      },
+      {
+        "name": "trimSilence",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "裁剪尾部静音", "text": "裁剪", "textOn": "裁剪", "textOff": "保留" },
+        "required": false,
+        "defaultValue": true,
+        "description": "默认裁剪模型输出的尾部静音。"
+      }
+    ]
+  },
+  {
+    "task": "voice-design",
+    "base-model": "ming_tts",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "CFG 引导强度", "min": 0, "max": 10, "step": 0.1 },
+        "required": true,
+        "defaultValue": 2.0,
+        "description": "classifier-free guidance 强度，上游默认 2.0。"
+      },
+      {
+        "name": "temperature",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "采样温度", "min": 0, "max": 2, "step": 0.05 },
+        "required": true,
+        "defaultValue": 0.0,
+        "description": "采样温度，0 为贪心解码（上游默认）。"
+      },
+      {
+        "name": "seed",
+        "type": "number",
+        "componentType": "input-number",
+        "componentProps": { "label": "随机种子", "step": 1, "nullable": true, "inputMode": "numeric" },
+        "required": false,
+        "defaultValue": null,
+        "description": "留空使用上游默认种子（1895）。"
+      },
+      {
+        "name": "textNormalization",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "文本正则化", "text": "数字/日期/单位归一化" },
+        "required": false,
+        "defaultValue": false,
+        "description": "依赖 pynini（Windows 无可靠 wheel）。默认关闭，关闭时跳过正则化。需启用请先 conda install -c conda-forge pynini==2.1.6。"
+      },
+      {
+        "name": "trimSilence",
+        "type": "boolean",
+        "componentType": "switch",
+        "componentProps": { "label": "裁剪尾部静音", "text": "裁剪", "textOn": "裁剪", "textOff": "保留" },
+        "required": false,
+        "defaultValue": true,
+        "description": "默认裁剪模型输出的尾部静音。"
+      }
+    ]
+  }
+]

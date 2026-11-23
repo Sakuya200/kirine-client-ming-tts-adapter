@@ -47,12 +47,13 @@ def build_infer_args(params: MingTTSParams, model_path: Path) -> list[str]:
     args = [
         "--model_path", str(model_path),
         "--task", task,
-        "--language_id", params.language_id,
         "--text", params.text,
         "--output", params.output_path,
         "--device", params.device,
         *task_segment,
     ]
+    if params.language_id is not None:
+        args += ["--language_id", params.language_id]
     return args + _generation_segment(params.generation)
 
 

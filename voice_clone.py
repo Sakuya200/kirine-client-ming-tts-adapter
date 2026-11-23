@@ -14,13 +14,11 @@ from pathlib import Path
 
 from common import run_infer, weights_dir
 from params import (
+    PROMPT_TEXT_TASKS,
     MingGenerationParams,
     MingVoiceCloneParams,
     load_voice_clone_params,
 )
-
-# 上游接受 --prompt_text 的任务（其余任务传了会被上游拒绝）。
-PROMPT_TEXT_TASKS = frozenset({"TTS", "MULTILINGUAL", "EMOTION"})
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

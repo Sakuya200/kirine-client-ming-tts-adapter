@@ -25,6 +25,9 @@ _CLONE_MODE_TASKS = {
     "multilingual": "MULTILINGUAL",
 }
 
+# 上游要求 prompt_text（参考文本转录）的任务；其余任务（BASIC/DIALECT）不接受。
+PROMPT_TEXT_TASKS: frozenset[str] = frozenset({"TTS", "MULTILINGUAL", "EMOTION"})
+
 
 def _float_param(params: ParamsEntity, key: str, default: float) -> float:
     raw = params.model_param_str(key, str(default))
@@ -73,17 +76,26 @@ def _load_generation(params: ParamsEntity) -> MingGenerationParams:
     )
 
 
-def _language_id(language: str | None) -> str:
-    """任务级语言（AppLanguage）→ 上游 ``language_id``；仅中英有意义。"""
-    if language is not None and language.strip().lower() == "english":
+def _language_id(language: str | None) -> str | None:
+    """任务级语言（AppLanguage）→ 上游 ``language_id``。
+
+    上游 TTS/clone 任务仅验证过中英；日/韩等其余应用语言不映射（省略
+    ``--language_id``，由上游按文本自动判定），避免静默贴错语言标签。
+    """
+    if not language:
+        return None
+    normalized = language.strip().lower()
+    if normalized == "english":
         return "English"
-    return "Chinese"
+    if normalized == "chinese":
+        return "Chinese"
+    return None
 
 
 @dataclass(frozen=True)
 class MingTTSParams:
     text: str
-    language_id: str
+    language_id: str | None
     speaker: str
     instruction: str
     generation: MingGenerationParams
@@ -151,6 +163,13 @@ def load_voice_clone_params(path: str | Path) -> MingVoiceCloneParams:
     if not resolved_ref.exists():
         raise FileNotFoundError(f"Reference audio file not found: {resolved_ref}")
 
+    ref_text = (args.ref_text or "").strip()
+    if task in PROMPT_TEXT_TASKS and not ref_text:
+        raise ValueError(
+            f"上游 {task} 任务要求参考文本（参考音频的逐字转录，--prompt_text）。"
+            f"请为参考音频填写转录文本。"
+        )
+
     if mode == "multilingual":
         language_id: str | None = (_str_param(params, "languageId", "") or "").strip() or None
         if language_id is None:
@@ -169,7 +188,7 @@ def load_voice_clone_params(path: str | Path) -> MingVoiceCloneParams:
         task=task,
         text=text,
         ref_audio_path=str(resolved_ref),
-        ref_text=(args.ref_text or "").strip(),
+        ref_text=ref_text,
         language_id=language_id,
         emotion=_mode_value("emotion") if mode == "emotion" else None,
         speed=_mode_value("speed") if mode == "attributes" else None,
