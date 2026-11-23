@@ -1,0 +1,21 @@
+{
+  "models": [
+    {
+      "baseModel": "ming_tts",
+      "modelName": "Ming-3.0-tts",
+      "modelVersion": "0.5B",
+      "downloadType": "Custom",
+      "requiredModelNameList": ["ming_tts_05b"],
+      "requiredModelRepoIdList": [],
+      "supportedDevices": ["cuda"],
+      "supportedFeatureList": ["text-to-speech", "voice-clone", "voice-design"],
+      "supportedLanguages": ["chinese", "english", "japanese", "korean"]
+    }
+  ],
+  "speakers": [
+    { "name": "灵小柔", "baseModel": "ming_tts", "description": "Bright, sweet young female voice. Customer service and IVR. Chinese/English." },
+    { "name": "灵楷", "baseModel": "ming_tts", "description": "Warm, resonant young male voice. Radio, documentary and audiobooks. Chinese/English." },
+    { "name": "UK_George", "baseModel": "ming_tts", "description": "Male. Audiobooks and formal announcements. English (UK)." },
+    { "name": "US_Emma", "baseModel": "ming_tts", "description": "Female. Voice assistants, narration and product dialogue. English (US)." }
+  ]
+}

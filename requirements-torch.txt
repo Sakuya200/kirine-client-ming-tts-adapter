@@ -1,0 +1,6 @@
+# Torch 运行时依赖。ensure_torch_runtime 按 CPU/CUDA index-url 安装对应轮子。
+# 上游（Dockerfile/requirements.txt）锁定 torch 2.6.0；cu130/cu128 索引无 2.6.0 轮子，
+# init_task_runtime 会自动降级到 cu126/cu124/cu118（2.6.0 在这些索引存在），属预期行为。
+torch==2.6.0
+torchaudio==2.6.0
+torchvision==0.21.0
