@@ -27,8 +27,8 @@ _CLONE_MODE_TASKS = {
 
 
 def _float_param(params: ParamsEntity, key: str, default: float) -> float:
-    raw = params.model_param(key, None)
-    if raw is None or str(raw).strip() == "":
+    raw = params.model_param_str(key, str(default))
+    if raw is None or raw.strip() == "":
         return default
     return float(raw)
 
@@ -38,7 +38,7 @@ def _optional_int_param(params: ParamsEntity, key: str) -> int | None:
     if raw is None or str(raw).strip() == "":
         return None
     try:
-        return int(raw)
+        return int(float(str(raw)))
     except (TypeError, ValueError):
         return None
 
